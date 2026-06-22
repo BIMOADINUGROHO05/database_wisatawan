@@ -1,1 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Wisatawan</title>
 
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        h2{
+            color: #333;
+        }
+
+        input{
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        button{
+            padding: 10px 20px;
+            background: #0d6efd;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        table{
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td{
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        th{
+            background: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Form Data Wisatawan</h2>
+
+<form id="wisatawanForm">
+    <label>ID Wisatawan</label>
+    <input type="text" id="id_wisatawan" required>
+
+    <label>Nama Wisatawan</label>
+    <input type="text" id="nama_wisatawan" required>
+
+    <button type="submit">Simpan</button>
+</form>
+
+<h2>Data Wisatawan</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID Wisatawan</th>
+            <th>Nama Wisatawan</th>
+        </tr>
+    </thead>
+    <tbody id="dataWisatawan"></tbody>
+</table>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCQ5ESwe1XMqzIBxbDwAhURY4JdWA0EnS0",
+    authDomain: "mdb01-cfd0b.firebaseapp.com",
+    projectId: "mdb01-cfd0b",
+    storageBucket: "mdb01-cfd0b.firebasestorage.app",
+    messagingSenderId: "820771556407",
+    appId: "1:820771556407:web:f679dd91ca04c8556483b2"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const form = document.getElementById("wisatawanForm");
+const tabel = document.getElementById("dataWisatawan");
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id_wisatawan =
+        document.getElementById("id_wisatawan").value;
+
+    const nama_wisatawan =
+        document.getElementById("nama_wisatawan").value;
+
+    try {
+        await addDoc(collection(db, "wisatawan"), {
+            id_wisatawan,
+            nama_wisatawan,
+            createdAt: new Date()
+        });
+
+        alert("Data berhasil disimpan");
+
+        form.reset();
+
+        loadData();
+
+    } catch (error) {
+        console.error(error);
+        alert("Gagal menyimpan data");
+    }
+});
+
+async function loadData() {
+
+    tabel.innerHTML = "";
+
+    const q = query(
+        collection(db, "wisatawan"),
+        orderBy("createdAt", "desc")
+    );
+
+    const snapshot = await getDocs(q);
+
+    snapshot.forEach((doc) => {
+
+        const data = doc.data();
+
+        tabel.innerHTML += `
+            <tr>
+                <td>${data.id_wisatawan}</td>
+                <td>${data.nama_wisatawan}</td>
+            </tr>
+        `;
+    });
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>
